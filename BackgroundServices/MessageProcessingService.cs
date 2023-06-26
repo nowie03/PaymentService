@@ -52,7 +52,7 @@ namespace PaymentService.BackgroundServices
                 }
                 catch (AlreadyClosedException ex)
                 {
-                    Console.WriteLine("unable to connect to queue");
+                    Console.WriteLine("unable to connect to queue");    
                     
 
                 }
