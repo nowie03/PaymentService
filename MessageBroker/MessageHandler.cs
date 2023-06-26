@@ -34,7 +34,7 @@ namespace PaymentService.MessageBroker
 
             Console.WriteLine($"message received from queue {message}");
 
-            Message<T>? eventMessage = JsonConvert.DeserializeObject<Message<T>>(message);
+            Message<Order>? eventMessage = JsonConvert.DeserializeObject<Message<Order>>(message);
            
 
             // Perform the message handling logic here based on the event message
@@ -42,6 +42,7 @@ namespace PaymentService.MessageBroker
             {
                 // Handle the PAYMENT_INITIATED event
                 Order order = eventMessage.Payload;
+                Console.WriteLine(order);
 
                 try
                 {
@@ -55,14 +56,14 @@ namespace PaymentService.MessageBroker
                     await _serviceContext.Payments.AddAsync(payment);
                     await _serviceContext.SaveChangesAsync();
 
+                _channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"error when adding cart on user addition in message handler {ex.Message}");
+                    Console.WriteLine($"error when creating payment for order id {order.Id} {ex.Message}");
                 }
 
                 //acknowldege queue of successful consume 
-                _channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
             }
 
 
