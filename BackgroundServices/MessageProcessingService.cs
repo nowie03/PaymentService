@@ -23,8 +23,13 @@ namespace PaymentService.BackgroundServices
             while (!stoppingToken.IsCancellationRequested)
             {
                 // Perform any additional background processing if needed
-
-                _messageBrokerClient.ReceiveMessage();
+                try
+                {
+                    _messageBrokerClient.ReceiveMessage();
+                }catch (Exception ex)
+                {
+                    Console.WriteLine("Error occured when receiving message");
+                }
                 await Task.Delay(1000, stoppingToken); // Delay between iterations to avoid high CPU usage
             }
 

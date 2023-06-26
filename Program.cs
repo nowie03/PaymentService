@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PaymentService.BackgroundServices;
 using PaymentService.Context;
 using PaymentService.MessageBroker;
 
@@ -16,7 +17,11 @@ namespace PaymentService
                 options=>options.UseSqlServer(
                     builder.Configuration.GetConnectionString("local-server")));
 
-            builder.Services.AddSingleton<IMessageBrokerClient, RabbitMQClient>();
+            builder.Services.AddTransient<IMessageBrokerClient, RabbitMQClient>();
+
+            builder.Services.AddSingleton<MessageProcessingService>();
+            builder.Services.AddHostedService<MessageProcessingService>(
+                provider=>provider.GetRequiredService<MessageProcessingService>());
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -5,7 +5,7 @@ using NuGet.Protocol.Plugins;
 using PaymentService.Models;
 using RabbitMQ.Client;
 using System.Text;
-
+using System.Threading.Channels;
 
 namespace PaymentService.MessageBroker
 {
@@ -42,20 +42,29 @@ namespace PaymentService.MessageBroker
             {
                 HostName = "localhost"
             };
-            //Create the RabbitMQ connection using connection factory details as i mentioned above
-            _connection = _connectionFactory.CreateConnection();
-            //Here we create channel with session and model
-            _channel = _connection.CreateModel();
-            //declare the queue after mentioning name and a few property related to that
-            _channel.QueueDeclare(_queueName, exclusive: false);
+            try
+            {
+                //Create the RabbitMQ connection using connection factory details as i mentioned above
+                _connection = _connectionFactory.CreateConnection();
+                //Here we create channel with session and model
+                _channel = _connection.CreateModel();
+                //declare the queue after mentioning name and a few property related to that
+                _channel.QueueDeclare(_queueName, exclusive: false);
 
-            _messageHandler = new(_channel, serviceProvider);
+                _messageHandler = new(_channel, serviceProvider);
+            }catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
         }
         public void SendMessage<T>(T message, string eventType)
         {
 
             //Serialize the message
+
+            if (_channel == null)
+                return;
 
 
             Message<T> eventMessage = new Message<T>(eventType, message);
@@ -72,7 +81,9 @@ namespace PaymentService.MessageBroker
 
         public void ReceiveMessage()
         {
+            if(_channel == null) return;
 
+            
             var consumer = new RabbitMQ.Client.Events.EventingBasicConsumer(_channel);
             consumer.Received += _messageHandler.HandleMessage;
             //read the message
