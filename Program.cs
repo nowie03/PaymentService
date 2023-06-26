@@ -17,7 +17,7 @@ namespace PaymentService
                 options=>options.UseSqlServer(
                     builder.Configuration.GetConnectionString("local-server")));
 
-            builder.Services.AddTransient<IMessageBrokerClient, RabbitMQClient>();
+            builder.Services.AddScoped<IMessageBrokerClient, RabbitMQClient>();
 
             builder.Services.AddSingleton<MessageProcessingService>();
             builder.Services.AddHostedService<MessageProcessingService>(
