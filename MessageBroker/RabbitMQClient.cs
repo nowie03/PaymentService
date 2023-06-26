@@ -83,6 +83,7 @@ namespace PaymentService.MessageBroker
         {
             if(_channel == null) return;
 
+           
             
             var consumer = new RabbitMQ.Client.Events.EventingBasicConsumer(_channel);
             consumer.Received += _messageHandler.HandleMessage;
