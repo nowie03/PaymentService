@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using PaymentService.Context;
+using PaymentService.MessageBroker;
+
 namespace PaymentService
 {
     public class Program
@@ -8,6 +12,12 @@ namespace PaymentService
 
             // Add services to the container.
 
+            builder.Services.AddDbContext<ServiceContext>(
+                options=>options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("local-server")));
+
+            builder.Services.AddSingleton<IMessageBrokerClient, RabbitMQClient>();
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -16,11 +26,10 @@ namespace PaymentService
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+           
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            
 
             app.UseAuthorization();
 

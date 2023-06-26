@@ -1,0 +1,72 @@
+﻿using Newtonsoft.Json;
+using PaymentService.Constants;
+using PaymentService.Context;
+using PaymentService.Models;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
+
+namespace PaymentService.MessageBroker
+{
+    public class MessageHandler<T> where T : Order
+    {
+        private readonly IModel _channel;
+
+        private readonly IServiceProvider _serviceProvider;
+
+        public MessageHandler(IModel channel, IServiceProvider serviceProvider)
+        {
+            //get servicecontext from injected service container
+            _serviceProvider = serviceProvider;
+
+            _channel = channel;
+
+            Console.WriteLine("message handler created");
+        }
+
+        public async void HandleMessage(object model, BasicDeliverEventArgs eventArgs)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var _serviceContext = scope.ServiceProvider.GetRequiredService<ServiceContext>();
+
+            var body = eventArgs.Body.ToArray();
+            var message = Encoding.UTF8.GetString(body);
+
+            Console.WriteLine($"message received from queue {message}");
+
+            Message<T> eventMessage = JsonConvert.DeserializeObject<Message<T>>(message);
+
+            // Perform the message handling logic here based on the event message
+            if (eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
+            {
+                // Handle the USER_CREATED event
+                Order order = eventMessage.Payload;
+
+                try
+                {
+                    Payment payment = new()
+                    {
+                        OrderId = order.Id,
+                        Status= Enums.PaymentStatus.COMPLETED,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    await _serviceContext.Payments.AddAsync(payment);
+                    await _serviceContext.SaveChangesAsync();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"error when adding cart on user addition in message handler {ex.Message}");
+                }
+
+                //acknowldege queue of successful consume 
+                _channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+            }
+
+
+            
+
+        }
+    }
+}
