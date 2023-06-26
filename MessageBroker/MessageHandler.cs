@@ -34,12 +34,13 @@ namespace PaymentService.MessageBroker
 
             Console.WriteLine($"message received from queue {message}");
 
-            Message<T> eventMessage = JsonConvert.DeserializeObject<Message<T>>(message);
+            Message<T>? eventMessage = JsonConvert.DeserializeObject<Message<T>>(message);
+           
 
             // Perform the message handling logic here based on the event message
-            if (eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
+            if (eventMessage!=null &&  eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
             {
-                // Handle the USER_CREATED event
+                // Handle the PAYMENT_INITIATED event
                 Order order = eventMessage.Payload;
 
                 try
@@ -47,7 +48,7 @@ namespace PaymentService.MessageBroker
                     Payment payment = new()
                     {
                         OrderId = order.Id,
-                        Status= Enums.PaymentStatus.COMPLETED,
+                        Status= Enums.PaymentStatus.PENDING,
                         CreatedAt = DateTime.Now
                     };
 
