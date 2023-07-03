@@ -49,7 +49,7 @@ namespace PaymentService.MessageBroker
                 //Here we create channel with session and model
                 _channel = _connection.CreateModel();
                 //declare the queue after mentioning name and a few property related to that
-                _channel.QueueDeclare(_queueName, exclusive: false);
+              
 
                 _messageHandler = new(_channel, serviceProvider);
             }catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)

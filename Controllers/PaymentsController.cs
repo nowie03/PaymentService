@@ -60,6 +60,9 @@ namespace PaymentService.Controllers
                 return BadRequest();
             }
 
+            //check if payment status is payment completed
+            //if yes then initiate a shipment
+
             _context.Entry(payment).State = EntityState.Modified;
 
             try
