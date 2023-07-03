@@ -1,8 +1,10 @@
-﻿namespace PaymentService.MessageBroker
+﻿using PaymentService.Models;
+
+namespace PaymentService.MessageBroker
 {
     public interface IMessageBrokerClient
     {
-        public void SendMessage<T>(T message, string eventType);
+        public void SendMessage(Message eventMessage);
 
         public void ReceiveMessage();
     }

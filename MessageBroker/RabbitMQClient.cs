@@ -58,7 +58,7 @@ namespace PaymentService.MessageBroker
             }
 
         }
-        public void SendMessage<T>(T message, string eventType)
+        public void SendMessage(Models.Message eventMessage)
         {
 
             //Serialize the message
@@ -67,7 +67,7 @@ namespace PaymentService.MessageBroker
                 return;
 
 
-            Message<T> eventMessage = new Message<T>(eventType, message);
+           
 
             string json = JsonConvert.SerializeObject(eventMessage);
 

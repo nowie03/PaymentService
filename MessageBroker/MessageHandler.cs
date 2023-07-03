@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PaymentService.Constants;
 using PaymentService.Context;
 using PaymentService.Models;
@@ -34,15 +35,40 @@ namespace PaymentService.MessageBroker
 
             Console.WriteLine($"message received from queue {message}");
 
-            Message<Order>? eventMessage = JsonConvert.DeserializeObject<Message<Order>>(message);
+            Message? eventMessage = JsonConvert.DeserializeObject<Message>(message);
+
+            //check if message is already-consumed
+
+            if (eventMessage != null)
+            {
+                string consumerId = "payment-service";
+
+                bool alreadyProcessed = await _serviceContext.ConsumedMessages.AnyAsync(message=>message.Id==eventMessage.Id
+                && message.ConsumerId==consumerId);
+
+                if (alreadyProcessed)
+                    return;
+                ConsumedMessage consumedMessage = new(eventMessage.Id, consumerId);
+                try
+                {
+                    await _serviceContext.ConsumedMessages.AddAsync(consumedMessage);
+                    await _serviceContext.SaveChangesAsync();
+                    
+                }catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+            }
            
 
             // Perform the message handling logic here based on the event message
             if (eventMessage!=null &&  eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
             {
                 // Handle the PAYMENT_INITIATED event
-                Order order = eventMessage.Payload;
-                Console.WriteLine(order);
+                Order order = JsonConvert.DeserializeObject<Order>(eventMessage.Payload);
+
+               
 
                 try
                 {

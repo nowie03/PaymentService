@@ -9,6 +9,14 @@ namespace PaymentService.Context
 
         public DbSet<Payment> Payments { get; set; }
 
+        public DbSet<ConsumedMessage> ConsumedMessages { get; set; }
 
+        override
+        protected void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ConsumedMessage>().HasIndex(message => message.MessageId).IsUnique();
+
+
+        }
     }
 }
