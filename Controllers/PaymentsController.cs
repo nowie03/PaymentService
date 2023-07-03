@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PaymentService.Context;
+using PaymentService.MessageBroker;
 using PaymentService.Models;
 
 namespace PaymentService.Controllers
@@ -15,10 +17,12 @@ namespace PaymentService.Controllers
     public class PaymentsController : ControllerBase
     {
         private readonly ServiceContext _context;
+        private readonly IMessageBrokerClient _rabbitMQClient;
 
-        public PaymentsController(ServiceContext context)
+        public PaymentsController(ServiceContext context,IServiceProvider serviceProvider)
         {
             _context = context;
+            _rabbitMQClient=serviceProvider.GetRequiredService<IMessageBrokerClient>();
         }
 
         // GET: api/Payments
@@ -62,6 +66,17 @@ namespace PaymentService.Controllers
 
             //check if payment status is payment completed
             //if yes then initiate a shipment
+            if(payment.Status==Constants.Enums.PaymentStatus.COMPLETED)
+            {
+                string serializedPayment=JsonConvert.SerializeObject(payment);
+                ulong nextSequenceNumber = _rabbitMQClient.GetNextSequenceNumber();
+
+                Message outboxMessage = new(Constants.EventTypes.PAYMENT_COMPLETED, serializedPayment,
+                    nextSequenceNumber, Constants.EventStates.EVENT_ACK_PENDING);
+
+                await _context.Outbox.AddAsync(outboxMessage);
+                await _context.SaveChangesAsync();
+            }
 
             _context.Entry(payment).State = EntityState.Modified;
 

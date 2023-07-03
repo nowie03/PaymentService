@@ -91,5 +91,7 @@ namespace PaymentService.MessageBroker
             _channel.BasicConsume(queue: _queueName, autoAck: false, consumer: consumer);
 
         }
+
+        public ulong GetNextSequenceNumber() => (ulong)(_channel?.NextPublishSeqNo);
     }
 }

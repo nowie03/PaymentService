@@ -23,6 +23,11 @@ namespace PaymentService
             builder.Services.AddHostedService<MessageProcessingService>(
                 provider=>provider.GetRequiredService<MessageProcessingService>());
 
+
+            builder.Services.AddSingleton<PublishMessageToQueue>();
+            builder.Services.AddHostedService<PublishMessageToQueue>(
+                provider => provider.GetRequiredService<PublishMessageToQueue>());
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

@@ -7,5 +7,7 @@ namespace PaymentService.MessageBroker
         public void SendMessage(Message eventMessage);
 
         public void ReceiveMessage();
+
+        public ulong GetNextSequenceNumber();
     }
 }
