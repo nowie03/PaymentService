@@ -1,15 +1,11 @@
-﻿using Microsoft.AspNetCore.Connections;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Newtonsoft.Json;
-using NuGet.Protocol.Plugins;
+﻿using Newtonsoft.Json;
 using PaymentService.Models;
 using RabbitMQ.Client;
 using System.Text;
-using System.Threading.Channels;
 
 namespace PaymentService.MessageBroker
 {
-    public class RabbitMQClient:IMessageBrokerClient,IDisposable
+    public class RabbitMQClient : IMessageBrokerClient, IDisposable
     {
         private ConnectionFactory _connectionFactory;
         private RabbitMQ.Client.IConnection _connection;
@@ -49,10 +45,11 @@ namespace PaymentService.MessageBroker
                 //Here we create channel with session and model
                 _channel = _connection.CreateModel();
                 //declare the queue after mentioning name and a few property related to that
-              
+
 
                 _messageHandler = new(_channel, serviceProvider);
-            }catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
+            }
+            catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -67,7 +64,7 @@ namespace PaymentService.MessageBroker
                 return;
 
 
-           
+
 
             string json = JsonConvert.SerializeObject(eventMessage);
 
@@ -81,10 +78,10 @@ namespace PaymentService.MessageBroker
 
         public void ReceiveMessage()
         {
-            if(_channel == null) return;
+            if (_channel == null) return;
 
-           
-            
+
+
             var consumer = new RabbitMQ.Client.Events.EventingBasicConsumer(_channel);
             consumer.Received += _messageHandler.HandleMessage;
             //read the message

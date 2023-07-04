@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PaymentService.Context;
@@ -19,20 +14,20 @@ namespace PaymentService.Controllers
         private readonly ServiceContext _context;
         private readonly IMessageBrokerClient _rabbitMQClient;
 
-        public PaymentsController(ServiceContext context,IServiceProvider serviceProvider)
+        public PaymentsController(ServiceContext context, IServiceProvider serviceProvider)
         {
             _context = context;
-            _rabbitMQClient=serviceProvider.GetRequiredService<IMessageBrokerClient>();
+            _rabbitMQClient = serviceProvider.GetRequiredService<IMessageBrokerClient>();
         }
 
         // GET: api/Payments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Payment>>> GetPayments()
         {
-          if (_context.Payments == null)
-          {
-              return NotFound();
-          }
+            if (_context.Payments == null)
+            {
+                return NotFound();
+            }
             return await _context.Payments.ToListAsync();
         }
 
@@ -40,10 +35,10 @@ namespace PaymentService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Payment>> GetPayment(int id)
         {
-          if (_context.Payments == null)
-          {
-              return NotFound();
-          }
+            if (_context.Payments == null)
+            {
+                return NotFound();
+            }
             var payment = await _context.Payments.FindAsync(id);
 
             if (payment == null)
@@ -66,9 +61,9 @@ namespace PaymentService.Controllers
 
             //check if payment status is payment completed
             //if yes then initiate a shipment
-            if(payment.Status==Constants.Enums.PaymentStatus.COMPLETED)
+            if (payment.Status == Constants.Enums.PaymentStatus.COMPLETED)
             {
-                string serializedPayment=JsonConvert.SerializeObject(payment);
+                string serializedPayment = JsonConvert.SerializeObject(payment);
                 ulong nextSequenceNumber = _rabbitMQClient.GetNextSequenceNumber();
 
                 Message outboxMessage = new(Constants.EventTypes.PAYMENT_COMPLETED, serializedPayment,
@@ -104,10 +99,10 @@ namespace PaymentService.Controllers
         [HttpPost]
         public async Task<ActionResult<Payment>> PostPayment(Payment payment)
         {
-          if (_context.Payments == null)
-          {
-              return Problem("Entity set 'ServiceContext.Payments'  is null.");
-          }
+            if (_context.Payments == null)
+            {
+                return Problem("Entity set 'ServiceContext.Payments'  is null.");
+            }
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 

@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace PaymentService.BackgroundServices
 {
-    public class MessageProcessingService:BackgroundService
+    public class MessageProcessingService : BackgroundService
     {
         private readonly IConfiguration _configuration;
         private readonly IServiceProvider _serviceProvider;
@@ -17,7 +17,7 @@ namespace PaymentService.BackgroundServices
             _configuration = configuration;
             _serviceProvider = serviceProvider;
             _messageBrokerClients = new ConcurrentDictionary<Guid, IMessageBrokerClient>();
-            _scopeKey=Guid.NewGuid();
+            _scopeKey = Guid.NewGuid();
 
 
         }
@@ -36,7 +36,7 @@ namespace PaymentService.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-         
+
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -44,19 +44,19 @@ namespace PaymentService.BackgroundServices
                 try
                 {
                     var scope = _serviceProvider.CreateScope();
-                    
+
                     var messageBrokerClient = GetScopedMessageBrokerClient(scope.ServiceProvider);
                     messageBrokerClient.ReceiveMessage();
-                       
-                    
+
+
                 }
                 catch (AlreadyClosedException ex)
                 {
-                    Console.WriteLine("unable to connect to queue");    
-                    
+                    Console.WriteLine("unable to connect to queue");
+
 
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }

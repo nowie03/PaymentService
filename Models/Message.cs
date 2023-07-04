@@ -31,4 +31,4 @@ namespace PaymentService.Models
             State = state;
         }
     }
-    }
+}

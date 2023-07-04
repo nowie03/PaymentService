@@ -2,7 +2,8 @@
 {
     public class Enums
     {
-        public enum PaymentStatus { 
+        public enum PaymentStatus
+        {
             PENDING,
             COMPLETED,
             FAILED

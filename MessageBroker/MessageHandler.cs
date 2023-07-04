@@ -43,8 +43,8 @@ namespace PaymentService.MessageBroker
             {
                 string consumerId = "payment-service";
 
-                bool alreadyProcessed = await _serviceContext.ConsumedMessages.AnyAsync(message=>message.Id==eventMessage.Id
-                && message.ConsumerId==consumerId);
+                bool alreadyProcessed = await _serviceContext.ConsumedMessages.AnyAsync(message => message.Id == eventMessage.Id
+                && message.ConsumerId == consumerId);
 
                 if (alreadyProcessed)
                     return;
@@ -53,36 +53,37 @@ namespace PaymentService.MessageBroker
                 {
                     await _serviceContext.ConsumedMessages.AddAsync(consumedMessage);
                     await _serviceContext.SaveChangesAsync();
-                    
-                }catch(Exception ex)
+
+                }
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
 
             }
-           
+
 
             // Perform the message handling logic here based on the event message
-            if (eventMessage!=null &&  eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
+            if (eventMessage != null && eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
             {
                 // Handle the PAYMENT_INITIATED event
                 Order order = JsonConvert.DeserializeObject<Order>(eventMessage.Payload);
 
-               
+
 
                 try
                 {
                     Payment payment = new()
                     {
                         OrderId = order.Id,
-                        Status= Enums.PaymentStatus.PENDING,
+                        Status = Enums.PaymentStatus.PENDING,
                         CreatedAt = DateTime.Now
                     };
 
                     await _serviceContext.Payments.AddAsync(payment);
                     await _serviceContext.SaveChangesAsync();
 
-                _channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
+                    _channel.BasicAck(eventArgs.DeliveryTag, multiple: false);
                 }
                 catch (Exception ex)
                 {
@@ -93,7 +94,7 @@ namespace PaymentService.MessageBroker
             }
 
 
-            
+
 
         }
     }

@@ -14,14 +14,14 @@ namespace PaymentService
             // Add services to the container.
 
             builder.Services.AddDbContext<ServiceContext>(
-                options=>options.UseSqlServer(
+                options => options.UseSqlServer(
                     builder.Configuration.GetConnectionString("local-server")));
 
             builder.Services.AddScoped<IMessageBrokerClient, RabbitMQClient>();
 
             builder.Services.AddSingleton<MessageProcessingService>();
             builder.Services.AddHostedService<MessageProcessingService>(
-                provider=>provider.GetRequiredService<MessageProcessingService>());
+                provider => provider.GetRequiredService<MessageProcessingService>());
 
 
             builder.Services.AddSingleton<PublishMessageToQueue>();
@@ -36,10 +36,10 @@ namespace PaymentService
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-           
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
 
             app.UseAuthorization();
 

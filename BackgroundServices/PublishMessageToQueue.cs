@@ -1,11 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.Context;
 using PaymentService.MessageBroker;
-using System.Collections.Concurrent;
-using PaymentService.Constants;
-using PaymentService.Context;
-using PaymentService.MessageBroker;
 using PaymentService.Models;
+using System.Collections.Concurrent;
 
 namespace PaymentService.BackgroundServices
 {
