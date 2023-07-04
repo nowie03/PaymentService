@@ -39,7 +39,7 @@ namespace PaymentService.MessageBroker
 
             //check if message is already-consumed
 
-            if (eventMessage != null)
+            if (eventMessage != null && eventMessage.EventType == EventTypes.PAYMENT_INITIATED)
             {
                 string consumerId = "payment-service";
 
