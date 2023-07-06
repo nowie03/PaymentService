@@ -31,6 +31,25 @@ namespace PaymentService.Controllers
             return await _context.Payments.ToListAsync();
         }
 
+        [HttpGet]
+        [Route("order")]
+        public async Task<ActionResult<Payment>> GetPaymentForOrder(int orderId)
+        {
+            if (_context.Payments == null)
+                return NotFound();
+
+            Payment? payment= await _context.Payments.Where(payment => payment.OrderId == orderId).FirstOrDefaultAsync();
+
+            if(payment == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(payment);
+
+
+        } 
+
         // GET: api/Payments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Payment>> GetPayment(int id)
